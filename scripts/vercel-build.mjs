@@ -43,6 +43,21 @@ writeFileSync(serverJsPath, serverJs);
 writeFileSync(
   resolve(funcDir, "index.mjs"),
   `
+// Force Vercel's @vercel/nft to trace and package dynamic imports
+import "h3-v2";
+import "@tanstack/router-core";
+import "seroval";
+import "@tanstack/history";
+import "@tanstack/router-core/ssr/client";
+import "@tanstack/router-core/ssr/server";
+import "react";
+import "@tanstack/react-router";
+import "react/jsx-runtime";
+import "@tanstack/react-router/ssr/server";
+import "@tanstack/react-query";
+import "lenis";
+import "three";
+
 import server from "./server.js";
 
 export default async function handler(req, res) {

@@ -34,9 +34,9 @@ cpSync(resolve(ROOT, "dist/server"), funcDir, { recursive: true });
 import { readFileSync } from "node:fs";
 const serverJsPath = resolve(funcDir, "server.js");
 let serverJs = readFileSync(serverJsPath, "utf8");
-serverJs = serverJs.replace(
+serverJs = serverJs.replaceAll(
   "return brandedErrorResponse();",
-  "return new Response(String(error.stack || error), { status: 500, headers: { 'content-type': 'text/plain' } });"
+  "return new Response(String(error ? (error.stack || error) : 'Unknown 500 error'), { status: 500, headers: { 'content-type': 'text/plain' } });"
 );
 writeFileSync(serverJsPath, serverJs);
 

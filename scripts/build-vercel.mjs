@@ -99,7 +99,7 @@ export default async function handler(req, res) {
 // 6. Write .vc-config.json
 writeFileSync(
   join(ssrFunc, ".vc-config.json"),
-  JSON.stringify({ runtime: "nodejs22.x", handler: "index.mjs", launcherType: "Nodejs", maxDuration: 30 }, null, 2)
+  JSON.stringify({ runtime: "nodejs20.x", handler: "index.mjs", launcherType: "Nodejs", maxDuration: 30 }, null, 2)
 );
 
 // 7. Write Vercel output config.json

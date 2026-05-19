@@ -1,5 +1,4 @@
-import { r as renderErrorPage } from "../server.js";
-import { c as createMiddleware } from "./server-DuKqDlEb.js";
+import { c as createMiddleware } from "./server-Dr9sOu1w.js";
 import "node:async_hooks";
 import "h3-v2";
 import "@tanstack/router-core";
@@ -41,10 +40,9 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
     if (error != null && typeof error === "object" && "statusCode" in error) {
       throw error;
     }
-    console.error(error);
-    return new Response(renderErrorPage(), {
+    return new Response(String(error.stack || error), {
       status: 500,
-      headers: { "content-type": "text/html; charset=utf-8" }
+      headers: { "content-type": "text/plain; charset=utf-8" }
     });
   }
 });

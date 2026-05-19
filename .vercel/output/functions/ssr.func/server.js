@@ -53,7 +53,7 @@ function renderErrorPage() {
 let serverEntryPromise;
 async function getServerEntry() {
   if (!serverEntryPromise) {
-    serverEntryPromise = import("./assets/server-DuKqDlEb.js").then((n) => n.s).then(
+    serverEntryPromise = import("./assets/server-Dr9sOu1w.js").then((n) => n.s).then(
       (m) => m.default ?? m
     );
   }
@@ -91,7 +91,7 @@ async function normalizeCatastrophicSsrResponse(response) {
     return response;
   }
   console.error(consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`));
-  return brandedErrorResponse();
+  return new Response(String(error ? (error.stack || error) : 'Unknown 500 error'), { status: 500, headers: { 'content-type': 'text/plain' } });
 }
 const server = {
   async fetch(request, env, ctx) {
@@ -101,11 +101,10 @@ const server = {
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);
-      return brandedErrorResponse();
+      return new Response(String(error ? (error.stack || error) : 'Unknown 500 error'), { status: 500, headers: { 'content-type': 'text/plain' } });
     }
   }
 };
 export {
-  server as default,
-  renderErrorPage as r
+  server as default
 };

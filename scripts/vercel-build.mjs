@@ -80,7 +80,7 @@ export default async function handler(req, res) {
       const errorText = await response.text();
       res.statusCode = 500;
       res.setHeader("Content-Type", "text/html; charset=utf-8");
-      res.end(`<h1>Catastrophic SSR Error (500)</h1><pre>${errorText}</pre>`);
+      res.end("<h1>Catastrophic SSR Error (500)</h1><pre>" + errorText + "</pre>");
       return;
     }
 
@@ -109,7 +109,7 @@ export default async function handler(req, res) {
     console.error("Vercel Wrapper caught exception:", error);
     res.statusCode = 500;
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.end(`Vercel Wrapper Exception: ${error.stack || error}`);
+    res.end("Vercel Wrapper Exception: " + (error.stack || error));
   }
 }
 `.trimStart(),

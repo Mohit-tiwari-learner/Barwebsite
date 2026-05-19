@@ -1160,7 +1160,7 @@ var createEarlyHintsForRequest = createEarlyHintsCollector;
 async function loadEntries() {
   const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
     import("./router-CyG8vc1S.js"),
-    import("./start-B6fE1RNx.js"),
+    import("./start-CZt7W_dV.js"),
     import("./__23tanstack-start-plugin-adapters-Cwee5PKy.js")
   ]);
   return {

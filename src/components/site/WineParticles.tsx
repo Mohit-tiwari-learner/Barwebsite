@@ -66,12 +66,19 @@ const FRAG = /* glsl */ `
     if (d > 0.5) discard;
 
     float core = smoothstep(0.5, 0.0, d);
-    float glow = pow(core, 2.2);
+    float glow = pow(core, 1.45);
 
-    vec3 col = vColor * (0.7 + vBrightness * 1.6);
-    col += vColor * glow * 0.8;
+    // Advanced photographic color-grading with saturation boost and contrast S-curve
+    vec3 col = vColor;
+    float lum = dot(col, vec3(0.299, 0.587, 0.114));
+    col = mix(vec3(lum), col, 1.38); // Saturation boost
+    col = smoothstep(0.0, 1.0, col); // S-curve contrast boost
+    
+    // Highlight & glow amplification
+    col *= (1.28 + vBrightness * 2.6);
+    col += vColor * glow * 1.8;
 
-    float a = glow * vAlpha * uReveal * (0.55 + vBrightness * 0.6);
+    float a = glow * vAlpha * uReveal * (0.95 + vBrightness * 1.25);
     gl_FragColor = vec4(col, a);
   }
 `;
@@ -89,6 +96,10 @@ export default function WineParticles({ active }: Props) {
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
+
+    let ratio = 2160 / 3840;
+    let worldW = 3.4;
+    let worldH = worldW * ratio;
 
     const scene = new THREE.Scene();
 
@@ -117,7 +128,7 @@ export default function WineParticles({ active }: Props) {
       uMouse: { value: new THREE.Vector2(10, 10) },
       uMouseStrength: { value: 0 },
       uPixelRatio: { value: renderer.getPixelRatio() },
-      uSize: { value: 0.9 },
+      uSize: { value: 1.22 },
     };
 
     let points: THREE.Points | null = null;
@@ -125,7 +136,7 @@ export default function WineParticles({ active }: Props) {
 
     const buildParticles = (img: HTMLImageElement) => {
       const targetW = 1100;
-      const ratio = img.height / img.width;
+      ratio = img.height / img.width;
       const w = targetW;
       const h = Math.round(targetW * ratio);
       const cnv = document.createElement("canvas");
@@ -141,8 +152,8 @@ export default function WineParticles({ active }: Props) {
       const seeds: number[] = [];
       const brights: number[] = [];
 
-      const worldW = 3.4 * 1.2; // increased 1.2x to match the image frames perfectly
-      const worldH = worldW * ratio;
+      worldW = 3.4;
+      worldH = worldW * ratio;
 
       // sample every pixel + add jittered duplicates on bright areas for density
       for (let y = 0; y < h; y += 1) {
@@ -152,15 +163,15 @@ export default function WineParticles({ active }: Props) {
           const g = data[i + 1] / 255;
           const b = data[i + 2] / 255;
           const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-          if (lum < 0.03) continue;
+          if (lum < 0.015) continue; // lower threshold to capture faint realistic details
 
-          // how many particles for this pixel: 1 base + extras for bright pixels
-          const extra = lum > 0.5 ? 2 : lum > 0.25 ? 1 : 0;
+          // More detailed particle distribution: density scales with brightness
+          const extra = lum > 0.75 ? 4 : lum > 0.5 ? 3 : lum > 0.25 ? 2 : lum > 0.1 ? 1 : 0;
           const reps = 1 + extra;
 
           for (let k = 0; k < reps; k++) {
-            const jx = (Math.random() - 0.5) * 0.9;
-            const jy = (Math.random() - 0.5) * 0.9;
+            const jx = (Math.random() - 0.5) * 0.85;
+            const jy = (Math.random() - 0.5) * 0.85;
             const wx = ((x + jx) / w - 0.5) * worldW;
             const wy = -((y + jy) / h - 0.5) * worldH;
             const wz = (Math.random() - 0.5) * 0.02;
@@ -178,7 +189,7 @@ export default function WineParticles({ active }: Props) {
 
             colors.push(r, g, b);
             seeds.push(Math.random());
-            brights.push(Math.min(1, lum * 1.25));
+            brights.push(Math.min(1, lum * 1.45)); // boost pixel brightness weight
           }
         }
       }
@@ -251,11 +262,27 @@ export default function WineParticles({ active }: Props) {
     window.addEventListener("pointermove", handleMove);
     window.addEventListener("pointerleave", handleLeave);
 
+    const halfFovRad = (camera.fov * Math.PI) / 360;
+    const tanHalfFov = Math.tan(halfFovRad);
+
     const onResize = () => {
       const W = mount.clientWidth;
       const H = mount.clientHeight;
       renderer.setSize(W, H);
       camera.aspect = W / H;
+
+      const planeAspect = 1 / ratio;
+      let dist = 3.2;
+      if (camera.aspect > planeAspect) {
+        // Canvas is wider than image aspect ratio: fit width
+        const frustumH = worldW / camera.aspect;
+        dist = frustumH / (2 * tanHalfFov);
+      } else {
+        // Canvas is narrower than image aspect ratio: fit height
+        dist = worldH / (2 * tanHalfFov);
+      }
+      camera.position.z = dist;
+
       camera.updateProjectionMatrix();
     };
     const ro = new ResizeObserver(onResize);

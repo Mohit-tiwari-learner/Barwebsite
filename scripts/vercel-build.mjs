@@ -30,6 +30,30 @@ const funcDir = resolve(OUT, "functions/ssr.func");
 mkdirSync(funcDir, { recursive: true });
 cpSync(resolve(ROOT, "dist/server"), funcDir, { recursive: true });
 
+// Copy node_modules needed at runtime directly into the function directory to bypass Vercel tracing issues
+const nodeModulesDest = resolve(funcDir, "node_modules");
+mkdirSync(nodeModulesDest, { recursive: true });
+const depsToCopy = [
+  "h3-v2",
+  "@tanstack/router-core",
+  "seroval",
+  "@tanstack/history",
+  "@tanstack/react-router",
+  "@tanstack/react-query",
+  "lenis",
+  "three",
+  "react",
+  "react-dom",
+  "scheduler"
+];
+for (const dep of depsToCopy) {
+  const src = resolve(ROOT, "node_modules", dep);
+  const dest = resolve(nodeModulesDest, dep);
+  if (existsSync(src)) {
+    cpSync(src, dest, { recursive: true });
+  }
+}
+
 // Patch server.js to return actual error
 const serverJsPath = resolve(funcDir, "server.js");
 let serverJs = readFileSync(serverJsPath, "utf8");

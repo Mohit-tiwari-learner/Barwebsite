@@ -261,11 +261,15 @@ export default function WineParticles({ active }: Props) {
     const ro = new ResizeObserver(onResize);
     ro.observe(mount);
 
-    const clock = new THREE.Clock();
+    let lastTime = performance.now();
+    let elapsedTime = 0;
     let raf = 0;
     const tick = () => {
-      const dt = Math.min(clock.getDelta(), 0.05);
-      const t = clock.elapsedTime;
+      const now = performance.now();
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+      elapsedTime += dt;
+      const t = elapsedTime;
       uniforms.uTime.value = t;
 
       const s = stateRef.current;

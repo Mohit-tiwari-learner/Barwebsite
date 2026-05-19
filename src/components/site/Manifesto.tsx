@@ -110,7 +110,7 @@ export function Manifesto() {
                   key={i}
                   src={src}
                   alt=""
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:left-[28%] max-h-[60vh] max-w-[85vw] md:max-h-[75vh] md:max-w-[55vw] object-contain"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 md:left-[28%] w-[85vw] h-[60vh] md:w-[55vw] md:h-[75vh] object-cover"
                   style={{
                     opacity: i === frameIndex ? 0.95 : 0,
                     filter: "brightness(1.05) contrast(1.25) saturate(1.1)",

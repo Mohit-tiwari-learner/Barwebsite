@@ -30,6 +30,16 @@ const funcDir = resolve(OUT, "functions/ssr.func");
 mkdirSync(funcDir, { recursive: true });
 cpSync(resolve(ROOT, "dist/server"), funcDir, { recursive: true });
 
+// Patch server.js to return actual error
+import { readFileSync } from "node:fs";
+const serverJsPath = resolve(funcDir, "server.js");
+let serverJs = readFileSync(serverJsPath, "utf8");
+serverJs = serverJs.replace(
+  "return brandedErrorResponse();",
+  "return new Response(String(error.stack || error), { status: 500, headers: { 'content-type': 'text/plain' } });"
+);
+writeFileSync(serverJsPath, serverJs);
+
 // 3. Write the serverless function adapter (bridges Node.js → dist/server/server.js fetch())
 writeFileSync(
   resolve(funcDir, "index.mjs"),
@@ -63,10 +73,17 @@ export default async function handler(req, res) {
     duplex: hasBody ? "half" : undefined,
   });
 
-  const response = await server.fetch(request, {}, {});
+      const response = await server.fetch(request, {}, {});
 
-  // Write response back to Node.js ServerResponse
-  res.statusCode = response.status;
+      // Add debug info if response is the catastrophic 500 error
+      if (response.status === 500) {
+        // Read the body, if it's the branded error, we know it's a catastrophic error.
+        // Actually, we can just let it stream but we don't have the error object here.
+        // The error was caught inside server.fetch().
+      }
+
+      // Write response back to Node.js ServerResponse
+      res.statusCode = response.status;
   response.headers.forEach((value, key) => {
     res.setHeader(key, value);
   });

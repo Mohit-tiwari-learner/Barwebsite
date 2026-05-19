@@ -8,7 +8,7 @@
  *   .vercel/output/functions/ssr.func/  — Node.js serverless function (from dist/server)
  */
 
-import { cpSync, mkdirSync, writeFileSync, rmSync, existsSync } from "node:fs";
+import { cpSync, mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const ROOT = process.cwd();
@@ -31,7 +31,6 @@ mkdirSync(funcDir, { recursive: true });
 cpSync(resolve(ROOT, "dist/server"), funcDir, { recursive: true });
 
 // Patch server.js to return actual error
-import { readFileSync } from "node:fs";
 const serverJsPath = resolve(funcDir, "server.js");
 let serverJs = readFileSync(serverJsPath, "utf8");
 serverJs = serverJs.replaceAll(

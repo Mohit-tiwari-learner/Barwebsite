@@ -1,6 +1,5 @@
 {
-  "version": 2,
-  "framework": null,
-  "buildCommand": "npm run build && node scripts/vercel-build.mjs",
-  "outputDirectory": ".vercel/output"
+  "buildCommand": "npm run build",
+  "outputDirectory": ".vercel/output",
+  "framework": null
 }

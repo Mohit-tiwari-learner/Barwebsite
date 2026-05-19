@@ -11,12 +11,10 @@
     "lint": "eslint .",
     "format": "prettier --write ."
   },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
-    "@cloudflare/vite-plugin": "^1.25.5",
-    "h3-v2": "npm:h3@2.0.1-rc.20",
-    "@tanstack/router-core": "^1.171.2",
-    "seroval": "^1.5.4",
-    "@tanstack/history": "^1.162.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",

@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { SmoothScroll } from "@/components/site/SmoothScroll";
 import { Cursor } from "@/components/site/Cursor";
 import { Preloader } from "@/components/site/Preloader";
@@ -13,11 +12,7 @@ import { Membership } from "@/components/site/Membership";
 import { Reserve } from "@/components/site/Reserve";
 import { Footer } from "@/components/site/Footer";
 
-export const Route = createFileRoute("/")({
-  component: Index,
-});
-
-function Index() {
+export default function App() {
   return (
     <main className="grain relative bg-ink text-bone selection:bg-crimson">
       <Preloader />

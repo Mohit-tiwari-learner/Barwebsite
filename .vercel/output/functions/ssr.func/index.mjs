@@ -17,7 +17,6 @@ import server from "./server.js";
 
 export default async function handler(req, res) {
   try {
-    // Build a standard Request from Node.js IncomingMessage
     const proto = req.headers["x-forwarded-proto"] || "https";
     const host = req.headers["x-forwarded-host"] || req.headers.host || "localhost";
     const url = new URL(req.url || "/", proto + "://" + host);
@@ -45,40 +44,24 @@ export default async function handler(req, res) {
 
     const response = await server.fetch(request, {}, {});
 
-    // If the response is a 500 error, read the text body and throw it as an error to expose it
-    if (response.status === 500) {
-      const errorText = await response.text();
-      res.statusCode = 500;
-      res.setHeader("Content-Type", "text/html; charset=utf-8");
-      res.end("<h1>Catastrophic SSR Error (500)</h1><pre>" + errorText + "</pre>");
-      return;
-    }
-
-    // Write response back to Node.js ServerResponse
     res.statusCode = response.status;
-    response.headers.forEach((value, key) => {
-      res.setHeader(key, value);
-    });
+    response.headers.forEach((value, key) => res.setHeader(key, value));
 
     if (response.body) {
       const reader = response.body.getReader();
-      const pump = async () => {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          res.write(value);
-        }
-        res.end();
-      };
-      await pump();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        res.write(value);
+      }
+      res.end();
     } else {
-      const text = await response.text();
-      res.end(text);
+      res.end(await response.text());
     }
   } catch (error) {
-    console.error("Vercel Wrapper caught exception:", error);
+    console.error("SSR handler error:", error);
     res.statusCode = 500;
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.end("Vercel Wrapper Exception: " + (error.stack || error));
+    res.setHeader("Content-Type", "text/plain");
+    res.end("Internal Server Error: " + (error.stack || error));
   }
 }

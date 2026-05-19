@@ -1,4 +1,4 @@
-import { cpSync, mkdirSync, writeFileSync, readdirSync } from "fs";
+import { cpSync, mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 
 const root = process.cwd();
@@ -20,10 +20,8 @@ cpSync(join(distServer, "assets"), join(ssrFunc, "assets"), { recursive: true })
 // 3. Copy server.js → ssr.func/server.js
 cpSync(join(distServer, "server.js"), join(ssrFunc, "server.js"));
 
-// 4. Find the hashed server entry filename for the import in index.mjs
-const serverAssets = readdirSync(join(distServer, "assets"));
-const serverEntry = serverAssets.find((f) => f.startsWith("server-") && f.endsWith(".js"));
-if (!serverEntry) throw new Error("Could not find server entry asset in dist/server/assets/");
+// 4. Find the hashed server entry filename — not needed, server.js is the entry
+// server.js is already copied in step 3
 
 // 5. Write ssr.func/index.mjs — the Vercel Node.js function handler
 writeFileSync(
